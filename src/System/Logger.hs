@@ -32,7 +32,7 @@ module System.Logger
     , Logger
     , Level      (..)
     , Output     (..)
-    , DateFormat
+    , DateFormat (..)
     , iso8601UTC
 
       -- * Core API
@@ -56,9 +56,7 @@ module System.Logger
     , module M
     ) where
 
-import Prelude hiding (log)
 import Control.Applicative
-import Control.AutoUpdate
 import Control.Monad
 import Control.Monad.IO.Class
 import Data.Maybe (fromMaybe)
@@ -67,6 +65,7 @@ import Data.UnixTime
 import System.Environment (lookupEnv)
 import System.Logger.Message as M
 import System.Logger.Settings
+import Prelude hiding (log)
 
 import qualified Data.Map.Strict       as Map
 import qualified System.Log.FastLogger as FL
@@ -120,9 +119,8 @@ new s = liftIO $ do
     fn StdErr   = FL.newStderrLoggerSet
     fn (Path p) = flip FL.newFileLoggerSet p
 
-    mkGetDate "" = return (return id)
-    mkGetDate f  = mkAutoUpdate defaultUpdateSettings
-        { updateAction = msg . formatUnixTimeGMT (template f) <$> getUnixTime }
+    mkGetDate Nothing  = return (return id)
+    mkGetDate (Just f) = return (msg . (display f) <$> getUnixTime)
 
     mergeWith m e = Map.fromList (readNote "Invalid LOG_LEVEL_MAP" e) `Map.union` m
 
