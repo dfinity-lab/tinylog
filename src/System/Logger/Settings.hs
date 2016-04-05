@@ -46,7 +46,7 @@ data Settings = Settings
     { _logLevel   :: !Level              -- ^ messages below this log level will be suppressed
     , _levelMap   :: !(Map Text Level)   -- ^ log level per named logger
     , _output     :: !Output             -- ^ log sink
-    , _format     :: !(Maybe DateFormat) -- ^ the timestamp format
+    , _format     :: !(Maybe DateFormat) -- ^ the timestamp format (use 'Nothing' to disable timestamps)
     , _delimiter  :: !ByteString         -- ^ text to intersperse between fields of a log line
     , _netstrings :: !Bool               -- ^ use <http://cr.yp.to/proto/netstrings.txt netstrings> encoding (fixes delimiter to \",\")
     , _bufSize    :: !Int                -- ^ how many bytes to buffer before commiting to sink
@@ -64,8 +64,8 @@ setOutput x s = s { _output = x }
 format :: Settings -> Maybe DateFormat
 format = _format
 
-setFormat :: DateFormat -> Settings -> Settings
-setFormat x s = s { _format = Just x }
+setFormat :: Maybe DateFormat -> Settings -> Settings
+setFormat x s = s { _format = x }
 
 bufSize :: Settings -> Int
 bufSize = _bufSize

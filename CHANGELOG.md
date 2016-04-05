@@ -1,3 +1,8 @@
+0.14.0
+-----------------------------------------------------------------------------
+- `setFormat` now expects a `Maybe DateFormat` to allow for not having a date
+  format at all.
+
 0.13.0
 -----------------------------------------------------------------------------
 - Change `DateFormat` representation to `UnixTime -> ByteString`. This
