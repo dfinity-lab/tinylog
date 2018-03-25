@@ -1,20 +1,28 @@
+variables:
+  STACK_ROOT: "${CI_PROJECT_DIR}/.stack"
+
+cache:
+  key: "$CI_JOB_NAME"
+  paths:
+    - .stack
+
 before_script:
-  - apt-get update
-  - apt-get install -y libstdc++-4.9-dev g++
-  - cabal update
+  - apt -qq update
+  - apt -qq install xz-utils make libstdc++-4.9-dev g++
+  - stack upgrade && hash -d stack && stack --version
+  - stack clean --full
 
-test:7.10:
-  image: haskell:7.10
+test:8.4:
+  image: haskell:8.2
   script:
-    - cabal install --enable-test --enable-bench --only-dep -j
-    - cabal build
-    - cabal test
-    - cabal bench
+    - stack -j 1 test --fast
 
-test:7.8:
-  image: haskell:7.8
+test:8.2:
+  image: haskell:8.2
   script:
-    - cabal install --enable-test --enable-bench --only-dep -j
-    - cabal build
-    - cabal test
-    - cabal bench
+    - stack -j 1 --resolver lts-11.1 test --fast
+
+test:8.0:
+  image: haskell:8.0
+  script:
+    - stack -j 1 --resolver lts-9.21 test --fast

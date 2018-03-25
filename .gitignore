@@ -7,7 +7,6 @@ cabal-dev
 *.aux*
 *.ps*
 *.hp*
-Setup.hs
 dist
 tmp
 log

@@ -89,9 +89,9 @@ data Logger = Logger
 -- @
 -- $ LOG_LEVEL=Info LOG_LEVEL_MAP='[("foo", Warn), ("bar", Trace)]' cabal repl
 -- > g1 <- new defSettings
--- > let g2 = clone (Just "foo") g
--- > let g3 = clone (Just "bar") g
--- > let g4 = clone (Just "xxx") g
+-- > let g2 = clone (Just "foo") g1
+-- > let g3 = clone (Just "bar") g1
+-- > let g4 = clone (Just "xxx") g1
 -- > logLevel (settings g1)
 -- Info
 -- > logLevel (settings g2)
