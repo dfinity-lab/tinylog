@@ -3,6 +3,7 @@
 -- file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 {-# LANGUAGE BangPatterns      #-}
+{-# LANGUAGE CPP               #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleInstances #-}
 
@@ -29,10 +30,17 @@ module System.Logger.Message
     , render
     ) where
 
+#if MIN_VERSION_base(4,9,0)
+import Data.Semigroup as Sem
+#endif
+
+#if !(MIN_VERSION_base(4,8,0))
+import Data.Monoid
+#endif
+
 import Data.ByteString (ByteString)
 import Data.Double.Conversion.Text
 import Data.Int
-import Data.Monoid
 import Data.String
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
@@ -49,12 +57,26 @@ import qualified Data.Text.Lazy.Encoding             as TL
 
 data Builder = Builder !Int B.Builder
 
-instance Monoid Builder where
-    mempty = Builder 0 mempty
-    (Builder x a) `mappend` (Builder y b) = Builder (x + y) (a <> b)
-
 instance IsString Builder where
     fromString = bytes
+
+appendBuilder:: Builder -> Builder -> Builder
+appendBuilder (Builder x a) (Builder y b) = Builder (x + y) (a <> b)
+
+#if MIN_VERSION_base(4,9,0)
+instance Sem.Semigroup Builder where
+    (<>) = appendBuilder
+#endif
+
+instance Monoid Builder where
+    mempty = Builder 0 mempty
+#if MIN_VERSION_base(4,11,0)
+    -- mappend definitions are redundant now
+#elif MIN_VERSION_base(4,9,0)
+    mappend = (Sem.<>)
+#else
+    mappend = appendBuilder
+#endif
 
 eval :: Builder -> L.ByteString
 eval (Builder n b) = B.toLazyByteStringWith (B.safeStrategy n 256) L.empty b
