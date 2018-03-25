@@ -1,3 +1,7 @@
+0.14.1
+-----------------------------------------------------------------------------
+- Maintenance release to enable compatibility with GHC 8.4.
+
 0.14.0
 -----------------------------------------------------------------------------
 - `setFormat` now expects a `Maybe DateFormat` to allow for not having a date
