@@ -8,7 +8,7 @@ cache:
 
 before_script:
   - apt -qq update
-  - apt -qq install libstdc++-4.9-dev g++
+  - apt -qq install xz-utils make libstdc++-4.9-dev g++
   - stack upgrade && hash -d stack && stack --version
   - stack clean --full
 
