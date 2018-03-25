@@ -12,6 +12,11 @@ before_script:
   - stack upgrade && hash -d stack && stack --version
   - stack clean --full
 
+test:8.4:
+  image: haskell:8.2
+  script:
+    - stack -j 1 test --fast
+
 test:8.2:
   image: haskell:8.2
   script:
