@@ -13,12 +13,16 @@ module System.Logger.Settings
     , defSettings
     , output
     , setOutput
+    , immFlush
+    , setImmFlush
     , format
     , setFormat
     , bufSize
     , setBufSize
     , delimiter
     , setDelimiter
+    , color
+    , setColor
     , netstrings
     , setNetStrings
     , logLevel
@@ -46,8 +50,10 @@ data Settings = Settings
     { _logLevel   :: !Level              -- ^ messages below this log level will be suppressed
     , _levelMap   :: !(Map Text Level)   -- ^ log level per named logger
     , _output     :: !Output             -- ^ log sink
+    , _immFlush   :: !Bool               -- ^ flush every message immediately
     , _format     :: !(Maybe DateFormat) -- ^ the timestamp format (use 'Nothing' to disable timestamps)
     , _delimiter  :: !ByteString         -- ^ text to intersperse between fields of a log line
+    , _color      :: !Bool               -- ^ color by log level
     , _netstrings :: !Bool               -- ^ use <http://cr.yp.to/proto/netstrings.txt netstrings> encoding (fixes delimiter to \",\")
     , _bufSize    :: !Int                -- ^ how many bytes to buffer before commiting to sink
     , _name       :: !(Maybe Text)       -- ^ logger name
@@ -59,6 +65,12 @@ output = _output
 
 setOutput :: Output -> Settings -> Settings
 setOutput x s = s { _output = x }
+
+immFlush :: Settings -> Bool
+immFlush = _immFlush
+
+setImmFlush :: Bool -> Settings -> Settings
+setImmFlush x s = s { _immFlush = x }
 
 -- | The time and date format used for the timestamp part of a log line.
 format :: Settings -> Maybe DateFormat
@@ -79,6 +91,12 @@ delimiter = _delimiter
 
 setDelimiter :: ByteString -> Settings -> Settings
 setDelimiter x s = s { _delimiter = x }
+
+color :: Settings -> Bool
+color = _color
+
+setColor :: Bool -> Settings -> Settings
+setColor x s = s { _color = x }
 
 -- | Whether to use <http://cr.yp.to/proto/netstrings.txt netstring>
 -- encoding for log lines.
@@ -167,8 +185,10 @@ defSettings = Settings
     Debug
     Map.empty
     StdOut
+    False
     (Just iso8601UTC)
     ", "
+    True
     False
     defaultBufSize
     Nothing

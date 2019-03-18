@@ -18,16 +18,19 @@
 -- @
 module System.Logger.Message
     ( ToBytes (..)
-    , Msg
-    , Builder
+    , Element(..)
+    , Msg(..)
+    , Builder(..)
     , msg
     , field
+    , finish
     , (.=)
     , (+++)
     , (~~)
     , val
     , eval
     , render
+    , render'
     ) where
 
 #if MIN_VERSION_base(4,9,0)
@@ -160,7 +163,10 @@ val = bytes
 -- the message elements. Cf. <http://cr.yp.to/proto/netstrings.txt> for
 -- details.
 render :: ByteString -> Bool -> (Msg -> Msg) -> L.ByteString
-render _ True m = finish . encAll mempty . elements . m $ empty
+render a b c = finish $ render' a b c
+
+render' :: ByteString -> Bool -> (Msg -> Msg) -> B.Builder
+render' _ True m = encAll mempty . elements . m $ empty
   where
     encAll !acc []     = acc
     encAll !acc (b:bb) = encAll (acc <> encOne b) bb
@@ -170,7 +176,7 @@ render _ True m = finish . encAll mempty . elements . m $ empty
 
     eq = B.byteString "1:=,"
 
-render s False m = finish . encAll mempty . elements . m $ empty
+render' s False m = encAll mempty . elements . m $ empty
   where
     encAll !acc    []  = acc
     encAll !acc (b:[]) = acc <> encOne b

@@ -17,10 +17,14 @@ module System.Logger
     , setLogLevelOf
     , output
     , setOutput
+    , immFlush
+    , setImmFlush
     , format
     , setFormat
     , delimiter
     , setDelimiter
+    , color
+    , setColor
     , netstrings
     , setNetStrings
     , bufSize
@@ -62,10 +66,13 @@ import Control.Monad.IO.Class
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.UnixTime
+import System.Console.ANSI
 import System.Environment (lookupEnv)
 import System.Logger.Message as M
 import System.Logger.Settings
 import Prelude hiding (log)
+
+import qualified Data.ByteString.Lazy.Builder as B
 
 import qualified Data.Map.Strict       as Map
 import qualified System.Log.FastLogger as FL
@@ -181,12 +188,24 @@ level = logLevel . settings
 
 putMsg :: MonadIO m => Logger -> Level -> (Msg -> Msg) -> m ()
 putMsg g l f = liftIO $ do
+    let cpre = case l of
+                 Trace -> setSGRCode [SetColor Foreground Dull White]
+                 Debug -> setSGRCode [SetColor Foreground Dull White]
+                 Info  -> setSGRCode [SetColor Foreground Vivid White]
+                 Warn  -> setSGRCode [SetColor Foreground Vivid Yellow]
+                 Error -> setSGRCode [SetColor Foreground Dull Red]
+                 Fatal -> setSGRCode [SetColor Foreground Vivid Red]
+    let csuf = setSGRCode [Reset]
     d <- getDate g
     let n = netstrings $ settings g
     let x = delimiter  $ settings g
     let s = nameMsg    $ settings g
-    let m = render x n (d . lmsg l . s . f)
-    FL.pushLogStr (logger g) (FL.toLogStr m)
+    let f' =  d . lmsg l . s . f
+    let m = if color (settings g)
+            then B.stringUtf8 cpre <> render' x n f' <> B.stringUtf8 csuf
+            else render' x n f'
+    FL.pushLogStr (logger g) (FL.toLogStr (finish m))
+    when (immFlush (settings g)) $ flush g
 
 lmsg :: Level -> (Msg -> Msg)
 lmsg Trace = msg (val "T")
