@@ -34,6 +34,7 @@ module System.Logger.Settings
     , name
     , setName
     , nameMsg
+    , setNameMsg
     , iso8601UTC
     ) where
 
@@ -133,10 +134,13 @@ name = _name
 
 setName :: Maybe Text -> Settings -> Settings
 setName Nothing   s = s { _name = Nothing, _nameMsg = id }
-setName (Just xs) s = s { _name = Just xs, _nameMsg = "logger" .= xs }
+setName (Just xs) s = s { _name = Just xs, _nameMsg = msg (xs <> ": ") }
 
 nameMsg :: Settings -> (Msg -> Msg)
 nameMsg = _nameMsg
+
+setNameMsg :: (Msg -> Msg) -> Settings -> Settings
+setNameMsg x s = s { _nameMsg = x }
 
 data Level
     = Trace
