@@ -134,7 +134,7 @@ name = _name
 
 setName :: Maybe Text -> Settings -> Settings
 setName Nothing   s = s { _name = Nothing, _nameMsg = id }
-setName (Just xs) s = s { _name = Just xs, _nameMsg = msg (xs <> ": ") }
+setName (Just xs) s = s { _name = Just xs, _nameMsg = msg xs }
 
 nameMsg :: Settings -> (Msg -> Msg)
 nameMsg = _nameMsg
